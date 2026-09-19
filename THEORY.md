@@ -45,3 +45,37 @@ Routes connect URLs to controllers. The controller reads the request and sends t
 
 ### Q13
 The two URLs are `GET /api/products` and `GET /api/products/:id`. `router.get("/top")` would answer `GET /api/products/top`. It must be placed before `/:id`, or `/:id` catches it first.
+
+### Q3
+The outputs are 10, 5 and 5. "مرحبا" has 5 characters, but each Arabic character takes 2 bytes in UTF-8, so the Buffer length is 10 bytes. "hello" has 5 characters and each takes 1 byte, so it is 5 bytes. The string `.length` counts characters (UTF-16 units), so it gives 5. Buffer length counts bytes, and string length counts characters.
+
+### Q8
+1. Bun runs TypeScript files directly, with no build step. 2. `bun install` is much faster than npm. 3. Bun has a built-in test runner and bundler. For a real team project today I would still pick Node, because it is more mature and most companies use it. For my own small projects I would try Bun for the speed.
+
+## Class 33
+
+### Q15
+M1 in
+M2 GET /
+handler starts
+handler ends
+M1 out
+"M1 out" prints last because `next()` runs everything after it first. When the handler finishes, control comes back to M1 and the line after `next()` runs.
+
+### Q16
+The client waits forever and sees a spinner. My terminal shows the earlier logs and then nothing. Express cannot guess that a middleware is done, because a middleware is allowed to end the request itself. So it waits until I call `next()` or send a response.
+
+### Q17
+Express counts the parameters. Four parameters means an error handler, and fewer means normal middleware. If I clean B to `(err, req, res)`, it becomes normal middleware and stops catching errors.
+
+### Q18
+`next()` moves to the next normal middleware. `next(err)` skips all the remaining normal middleware and jumps to the error handler. In `[logger, json, routes, errorHandler]`, (a) `next()` from the routes goes on to the next normal middleware, and (b) `next(err)` goes straight to the error handler.
+
+### Q19
+`res.on("finish", ...)` only saves a listener. It does not run yet. `next()` is called, the handler runs and `res.send()` sends the response. Only then does the "finish" event fire, and the log line is written. So the time it logs covers the whole request.
+
+### Q20
+In Express 4, an error inside an async handler is not caught, so the request hangs or the process gets an unhandled rejection. In Express 5, the error goes to the error handler automatically. Two fixes for Express 4: wrap the code in `try/catch` and call `next(err)`, or use an `asyncHandler` wrapper. I check my version with `npm ls express`.
+
+### Q21
+404 means no route matched, and nothing crashed. 500 means a handler crashed. The 404 handler comes before the error handler, and both come last, after all routes. If I swap them, the order is wrong and the code stops following the standard pipeline, which makes errors harder to handle.
